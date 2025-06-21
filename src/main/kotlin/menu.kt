@@ -7,12 +7,12 @@ abstract class Menu<T>(private val title: String, protected val items: MutableLi
     open fun show() {
         while (true) {
             println("\n$title:")
-            items.forEachIndexed { _, item -> println("${items.indexOf(item)}. ${item.title}") }
+            items.forEachIndexed { index, item -> println("$index. ${item.title}") }
             println("${items.size}. ${exitItem.title}")
 
             when (val selected = readValidOption()) {
                 items.size -> return
-                else -> items[selected].action()?.let { onItemSelected(item = it) }
+                else -> items[selected].action()?.let { result -> onItemSelected(result) }
             }
         }
     }
@@ -29,6 +29,14 @@ abstract class Menu<T>(private val title: String, protected val items: MutableLi
             } catch (e: NumberFormatException) {
                 println("Ошибка: введите корректное число")
             }
+        }
+    }
+
+    protected fun readNonEmptyString(errorMessage: String): String {
+        while (true) {
+            val input = scanner.nextLine()
+            if (input.isNotBlank()) return input
+            println(errorMessage)
         }
     }
 }

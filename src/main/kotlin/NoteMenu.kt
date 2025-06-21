@@ -1,14 +1,20 @@
-class NoteMenu(private val archive: Archive) : Menu<Note>("Архив: ${archive.name}", mutableListOf()) {
+class NoteMenu(archive: Archive) : Menu<Note>("Архив: ${archive.name}", mutableListOf()) {
+    private var currentArchive = archive
+
     init {
         items.add(MenuItem("Создать заметку") { createNote() })
     }
 
     override fun show() {
+        updateNoteItems()
+        super.show()
+    }
+
+    private fun updateNoteItems() {
         items.removeAll { it.title != "Создать заметку" }
-        archive.notes.forEach { note ->
+        currentArchive.notes.forEach { note ->
             items.add(MenuItem(note.title) { note })
         }
-        super.show()
     }
 
     override fun onItemSelected(item: Note) {
@@ -22,24 +28,17 @@ class NoteMenu(private val archive: Archive) : Menu<Note>("Архив: ${archive
         println("Введите текст заметки:")
         val content = readNonEmptyString("Текст не может быть пустым!")
 
-        return Note(title, content).also {
-            archive.notes.add(it)
-            println("Заметка '$title' создана!")
-        }
+        val newNote = Note(title, content)
+        currentArchive = currentArchive.copy(notes = currentArchive.notes + newNote)
+        println("Заметка '$title' создана!")
+        updateNoteItems()
+        return newNote
     }
 
     private fun showNoteContent(note: Note) {
-        println("\nЗаметка: ${note.title}")
-        println("Текст: ${note.content}")
+        println("\n=== ${note.title} ===")
+        println(note.content)
         println("\nНажмите Enter чтобы вернуться...")
         scanner.nextLine()
-    }
-
-    private fun readNonEmptyString(errorMessage: String): String {
-        while (true) {
-            val input = scanner.nextLine()
-            if (input.isNotBlank()) return input
-            println(errorMessage)
-        }
     }
 }
