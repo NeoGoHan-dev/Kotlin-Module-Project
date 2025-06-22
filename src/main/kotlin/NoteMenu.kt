@@ -1,17 +1,19 @@
-class NoteMenu(archive: Archive) : Menu<Note>("Архив: ${archive.name}", mutableListOf()) {
-    private var currentArchive = archive
+class NoteMenu(initialArchive: Archive) : Menu<Note>("Архив: ${initialArchive.name}", mutableListOf()) {
+    private var currentArchive = initialArchive
+
+    fun getCurrentArchive(): Archive = currentArchive
 
     init {
-        items.add(MenuItem("Создать заметку") { createNote() })
+        items.add(MenuItem(Constants.CREATE_NOTE) { createNote() })
     }
 
     override fun show() {
-        updateNoteItems()
+        updateMenuItems()
         super.show()
     }
 
-    private fun updateNoteItems() {
-        items.removeAll { it.title != "Создать заметку" }
+    private fun updateMenuItems() {
+        items.removeAll { it.title != Constants.CREATE_NOTE }
         currentArchive.notes.forEach { note ->
             items.add(MenuItem(note.title) { note })
         }
@@ -23,15 +25,15 @@ class NoteMenu(archive: Archive) : Menu<Note>("Архив: ${archive.name}", mut
 
     private fun createNote(): Note {
         println("\nВведите название заметки:")
-        val title = readNonEmptyString("Название не может быть пустым!")
+        val title = readNonEmptyString(Constants.EMPTY_NAME_ERROR)
 
         println("Введите текст заметки:")
-        val content = readNonEmptyString("Текст не может быть пустым!")
+        val content = readNonEmptyString(Constants.EMPTY_CONTENT_ERROR)
 
         val newNote = Note(title, content)
         currentArchive = currentArchive.copy(notes = currentArchive.notes + newNote)
         println("Заметка '$title' создана!")
-        updateNoteItems()
+        updateMenuItems()
         return newNote
     }
 
