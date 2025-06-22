@@ -2,22 +2,25 @@ import java.util.Scanner
 
 abstract class Menu<T>(private val title: String, protected val items: MutableList<MenuItem<T>>) {
     protected val scanner = Scanner(System.`in`)
-    private val exitItem = MenuItem("Выход") { null }
+    private val exitItem = MenuItem(Constants.EXIT) { null }
 
     open fun show() {
         while (true) {
-            println("\n$title:")
-            items.forEachIndexed { index, item -> println("$index. ${item.title}") }
-            println("${items.size}. ${exitItem.title}")
-
+            printMenu()
             when (val selected = readValidOption()) {
                 items.size -> return
-                else -> items[selected].action()?.let { result -> onItemSelected(result) }
+                else -> items[selected].action()?.let { onItemSelected(it) }
             }
         }
     }
 
     protected abstract fun onItemSelected(item: T)
+
+    private fun printMenu() {
+        println("\n$title:")
+        items.forEachIndexed { index, item -> println("$index. ${item.title}") }
+        println("${items.size}. ${exitItem.title}")
+    }
 
     private fun readValidOption(): Int {
         while (true) {
@@ -25,9 +28,9 @@ abstract class Menu<T>(private val title: String, protected val items: MutableLi
             try {
                 val input = scanner.nextLine().toInt()
                 if (input in 0..items.size) return input
-                println("Ошибка: введите число от 0 до ${items.size}")
+                println(Constants.INVALID_NUMBER_ERROR.format(0, items.size))
             } catch (e: NumberFormatException) {
-                println("Ошибка: введите корректное число")
+                println(Constants.NOT_A_NUMBER_ERROR)
             }
         }
     }
